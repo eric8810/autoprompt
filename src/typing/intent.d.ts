@@ -1,11 +1,19 @@
 export interface User {
   id: string
   name: string
-  extension: { [key: string]: string }
+  extension: Extension[]
+}
+
+export interface Extension {
+  tag: string
+  content: string
 }
 export interface Intent {
-  instruction: string
-  user: User
-  requestTime?: number
-  options: any
+  useCases?: string[]
+  description: string
+  options?: {
+    cot?: boolean
+    param?: boolean
+    example?: boolean
+  }
 }

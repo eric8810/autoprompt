@@ -1,11 +1,11 @@
 {
   "name": "auto-prompt",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "./src/example.ts",
   "scripts": {
-    "dev": "ts-node ./src/index.ts"
+    "dev": "ts-node ./src/example.ts"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "devDependencies": {
     "@types/node": "^20.4.8",
     "dotenv": "^16.3.1",

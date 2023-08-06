@@ -4,6 +4,7 @@ import { Intent } from '../typing/intent'
 import { Context } from 'vm'
 import { ValidDataSet } from '../typing/dataset'
 import { analyzeBasePrompt } from '../prompt/analyze'
+import { ChatGPT } from '../model/chatGPT'
 
 export class Generator {
   config: GeneratorConfig
@@ -35,13 +36,55 @@ export class Generator {
    * @param {Intent} intent
    * @async
    */
-  async analyze(intent: Intent, environment: Environment): Promise<Context> {
+  async analyze(intent: Intent, environment?: Environment): Promise<Context> {
+    //     user: User
+    // requestTime?: number
     const context: Context = {
       template: '',
       params: []
     }
-    let analyzePrompt: string = `${analyzeBasePrompt}`
+    let systemPrompt = `
+      Think in English and reply in user's description language.
+      ${analyzeBasePrompt}
+    `
+    let analyzePrompt: string = `
+      <description>
+        ${intent.description}
+      </description>
+    `
 
+    if (intent.useCases) {
+      const userCases = intent.useCases.map(
+        (useCase: string, index: number) => {
+          return `
+        <user-case-${index}>
+          ${useCase}
+        </user-case-${index}>
+      `
+        }
+      )
+      analyzePrompt = `${userCases}${analyzePrompt}`
+    }
+
+    if (environment) {
+      const envPrompt = `<environment>
+          the prompt is performed on ${environment.platform.name}, the platform is for ${environment.platform.description}
+        </environment>`
+
+      analyzePrompt = `${analyzePrompt}${envPrompt}`
+    }
+
+    if (intent.options?.cot) {
+      systemPrompt = `${systemPrompt} The prompt need to remind model to think step by step. \n`
+    }
+    if (intent.options?.example) {
+      systemPrompt = `${systemPrompt} The prompt need to show one question answer pair example. \n`
+    }
+    if (intent.options?.param) {
+    }
+
+    const chatGPT = new ChatGPT()
+    chatGPT.query(systemPrompt, analyzePrompt)
     return context
   }
 
